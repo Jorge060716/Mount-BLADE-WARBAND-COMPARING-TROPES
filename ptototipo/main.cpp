@@ -7,11 +7,40 @@
 #include<limits>
 #include<string>
 #include<map>
+#include<cmath>
+#include <algorithm>
 #include <sstream>   //convertir string en numeros
 
 using namespace std;
 using map_t=map<int,int>;
 using pair_t=pair<int,int>;
+
+void ejemplo(){
+    cout << "Ingresa las tropas separadas por '+'"<< endl;
+    cout << "El primer numero es el id de la tropa y el segundo la cantidad" << endl;
+    cout << "Ejemplo: 0 5 + 27 30 + 35 87;" << endl;
+    cout<<"Ejercito:"<<endl;
+    cout<<"-5 Recluta Nórdico"<<endl;
+    cout<<"--Poder por unidad: 2"<<endl;
+    cout<<"--Nivel de la unidad: 6"<<endl;
+    cout<<"--Salario de la unidad: 3"<<endl;
+    cout<<"-30 Sargento Swadiano"<<endl;
+    cout<<"--Poder por unidad: 16"<<endl;
+    cout<<"--Nivel de la unidad: 25"<<endl;
+    cout<<"--Salario de la unidad: 51"<<endl;
+    cout<<"-87 Ballestero Rhodok veterano"<<endl;
+    cout<<"--Poder por unidad: 11"<<endl;
+    cout<<"--Nivel de la unidad: 20"<<endl;
+    cout<<"--Salario de la unidad: 21"<<endl;
+    cout<<"Poder Total del Ejercito: 1447"<<endl;
+    cout<<"Costo total del Ejercito: 3372 denares"<<endl;
+}
+
+void pausar() {
+    cout << "\nPresione ENTER para continuar...";
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    cin.get();
+}
 
 void animacionCarga(const string& mensaje, int ms = 1500) {
     cout << mensaje;
@@ -27,13 +56,17 @@ void animacionCarga(const string& mensaje, int ms = 1500) {
     cout << "\r" << mensaje << "... ✔\n";
 }
 
-void menu(){
-   
-    cout<<"Bienvenido al fucking programa para ver cual es el mejor ejercito"<<endl;
-    cout<<"Opcion 1:Leer los 2 ejercitos"<<endl;
-    cout<<"Opcion 2:Ver codigo de tropas"<<endl;
-    cout<<"Opcion 3:Comparar los ejercitos"<<endl;
-    cout<<"Opcion 4:Salir"<<endl;
+void menu(){ 
+    cout << "\n";
+    cout << "  ╔══════════════════════════════════════════════════╗\n";
+    cout << "  ║      ⚔  COMPARADOR DE EJERCITOS  ⚔               ║\n";
+    cout << "  ╚══════════════════════════════════════════════════╝\n";
+    cout << "\n";
+    cout << "   [1]" << " Leer los 2 ejercitos\n";
+    cout << "   [2]" << " Ver catalogo de tropas\n";
+    cout << "   [3]" << " Comparar los ejercitos\n";
+    cout << "   [4]" << " Salir\n";
+    cout << "\n"<< "   > ";
 }
 void lista_tropas(){
     animacionCarga("Contando tropas");
@@ -42,26 +75,77 @@ void lista_tropas(){
         cout<<i<<"--"<<base_de_datos[i].nombre<<"\n";
     }
 }
-void detectar_tropas(){
 
-}
 //Coge el string lo convierte en su numero y lo guarda en el mapa
-map_t string_to_int(string ejercito){
-    //convertir string en numeros
+map_t string_to_int(const string& ejercito){
     map_t ejer;
+    string limpio=ejercito;
+    //Sustituye el + por un espacio para q el stringstream no tenga error
+    for (char &c : limpio){
+        if (c=='+') c=' ';
+        
+    }
+    
 
-    stringstream ss(ejercito);
+    stringstream ss(limpio);
     int id_tropa;
     int cantidad;
     while (ss >> id_tropa >> cantidad) {
+        if (id_tropa<0 || id_tropa>=base_de_datos.size()){
+            cout<<"ID invalido"<<id_tropa<<endl;
+            continue;
+        }
+        if (cantidad<=0){
+            cout<<"Cantidad invalida para ID"<<cantidad<<endl;
+            continue;
+        }
         // ¡Lo guardamos en el mapa!
         ejer[id_tropa] += cantidad; 
-        }
+    }
     
     return ejer;
 }
 
 
+void eic_tropas(const map_t &x){  //Extraer Imprimir Caluclar
+    int cantidad;
+    int id;
+    int total_poder=0;
+    int tmp_poder;
+    int total_salario=0;
+    int tmp_salario;
+    int total_soldados=0;
+    for(const auto& par : x){
+        tmp_poder=0;
+        tmp_salario=0;
+        //Saco datos del mapa
+        id=par.first;
+        cantidad=par.second;
+        //Imprime el ejercito
+        cout<<-cantidad<<" "<<base_de_datos[id].nombre<<endl;
+        //Calcula el poder total del ejercito
+        const int s=base_de_datos[id].nivel +4;
+        const int v=(2*s*s) /100;
+        tmp_poder=max(1,v);
+        //Imprime su poder
+        cout<<"--Poder por unidad: "<<tmp_poder<<endl;
+        cout<<"--Nivel de la unidad: "<<base_de_datos[id].nivel<<endl;
+        //Calcula el salario
+        int w=((s-1)*(s-1))/25;
+        tmp_salario=max(1,w);
+        if (base_de_datos[id].rol=="Caballería") tmp_salario=tmp_salario*5/3;
+        //Imprime el salario
+        cout<<"--Salario de la unidad: "<<tmp_salario<<endl;
+        //Calcual el total del salario y del poder
+        total_poder+=tmp_poder*cantidad;
+        total_salario+=tmp_salario*cantidad;
+        total_soldados+=cantidad;
+    }
+    cout<< "  ─────────────────────────────────────\n";
+    cout<< "  Unidades totales: "<< total_soldados << "\n";
+    cout<< "  Poder total:      "<< total_poder<< "\n";
+    cout<< "  Costo total:      "<< total_salario<< " denares"<< "\n";
+}
 int main(){
     int aux=0;
     string ejercito1;
@@ -86,28 +170,32 @@ int main(){
             }
         switch(aux){
         case 1:
-            cout << "Ingresa las tropas separadas por '+' y termina con ';'" << endl;
-            cout << "El primer numero es el id de la tropa y el segundo la cantidad" << endl;
-            cout << "Ejemplo: 0 5 + 1 6 + 2 7;" << endl;
-            
+            system("clear");
+            ejemplo();
+            pausar();
+            system("clear");
             // --- EJERCITO 1 ---
             cout << "\nDiga el primer ejercito: ";
             getline(cin, ejercito1); 
             ejer1 = string_to_int(ejercito1);
-
             // --- EJERCITO 2 ---
             cout << "Diga el segundo ejercito: ";
             getline(cin, ejercito2); 
             ejer2 = string_to_int(ejercito2);
             break;
         case 2:
+            system("clear");
             lista_tropas();
             break;
         case 3:
-            
+            system("clear");
+            eic_tropas(ejer1);
+            eic_tropas(ejer2);
+            break;
         default: 
             if(aux != 4) {
                 cout<<"Numero incorrecto, por favor escriba un numero correcto"<<endl;
+                pausar();
             }
             break;
         }

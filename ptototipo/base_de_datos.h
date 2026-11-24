@@ -11,7 +11,7 @@ struct Tropa{
     int salario;
 };
 
-vector<Tropa> base_de_datos{
+inline const vector<Tropa> base_de_datos{
    // Reino Nórdico (9)
     {"Recluta Nórdico",                         6,  "Infantería",        2,  3},
     {"Soldado de a pie Nórdico",               10,  "Infantería",        3,  6},
